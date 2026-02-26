@@ -258,6 +258,24 @@ npm ci && npm run build
 npm test
 ```
 
+### Quick Sync for Plugin Updates
+
+If the plugin is already installed and there's a minor update, pull and build directly in the plugin cache directory:
+
+```bash
+cd ~/.claude/plugins/cache/claude-hud/claude-hud/0.0.7
+git pull
+npm ci && npm run build
+```
+
+Or sync the build artifacts from your dev machine:
+
+```bash
+scp -r dist/ user@server:~/.claude/plugins/cache/claude-hud/claude-hud/0.0.7/dist/
+```
+
+No restart needed — the plugin re-executes on each refresh, so updates take effect immediately.
+
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
