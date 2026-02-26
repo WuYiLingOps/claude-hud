@@ -261,6 +261,24 @@ npm ci && npm run build
 npm test
 ```
 
+### 快速同步插件更新
+
+如果已安装插件，后续有小版本更新，可直接在插件缓存目录拉取并构建：
+
+```bash
+cd ~/.claude/plugins/cache/claude-hud/claude-hud/0.0.7
+git pull
+npm ci && npm run build
+```
+
+或从开发机同步构建产物：
+
+```bash
+scp -r dist/ user@server:~/.claude/plugins/cache/claude-hud/claude-hud/0.0.7/dist/
+```
+
+无需重启 Claude Code，插件每次刷新都会重新执行，更新即时生效。
+
 详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ---
