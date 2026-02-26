@@ -6,15 +6,25 @@
  * 系统用户：Administrator
  * 作　　者：無以菱
  * 联系邮箱：huangjing510@126.com
- * 功能描述：累计 token 用量与费用估算模块，基于统一定价计算会话累计费用
+ * 功能描述：累计 token 用量与费用估算模块，按模型分级定价计算会话累计费用
  */
 
-// 累计 token 用量
+// 单个模型的累计 token 用量
+export interface ModelTokenUsage {
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  cacheWriteTokens: number;
+  cacheReadTokens: number;
+}
+
+// 汇总的累计 token 用量（所有模型合计）
 export interface CumulativeTokenUsage {
   inputTokens: number;
   outputTokens: number;
   cacheWriteTokens: number;
   cacheReadTokens: number;
+  byModel: ModelTokenUsage[];
 }
 
 // 费用估算结果
@@ -24,24 +34,53 @@ export interface CostEstimate {
   outputCost: number;
 }
 
-// 统一定价（美元 / 1M tokens）
-const INPUT_PRICE_PER_M = 5;
-const OUTPUT_PRICE_PER_M = 25; // 输入价格 × 5
+// 模型定价（美元 / 1M tokens）
+interface ModelPricing {
+  inputPerM: number;
+  outputPerM: number;
+}
+
+// 按模型系列分级定价，补全价格 = 提示价格 × 5
+const MODEL_PRICING: Record<string, ModelPricing> = {
+  opus: { inputPerM: 5, outputPerM: 25 },
+  sonnet: { inputPerM: 3, outputPerM: 15 },
+};
+
+// 默认定价（未匹配时使用 opus 定价）
+const DEFAULT_PRICING: ModelPricing = MODEL_PRICING.opus;
 
 /**
- * calculateCost 根据累计 token 用量计算估算费用
- * @param tokens 累计 token 用量
+ * findPricing 根据模型 ID 匹配定价
+ * @param modelId 模型 ID，如 claude-opus-4-6、claude-sonnet-4
+ * @return 对应的定价
+ */
+function findPricing(modelId: string): ModelPricing {
+  const lower = modelId.toLowerCase();
+  for (const [key, pricing] of Object.entries(MODEL_PRICING)) {
+    if (lower.includes(key)) return pricing;
+  }
+  return DEFAULT_PRICING;
+}
+
+/**
+ * calculateCost 根据累计 token 用量按模型分级计算估算费用
+ * @param tokens 累计 token 用量（含按模型分类）
  * @return CostEstimate 费用估算结果
  */
 export function calculateCost(tokens: CumulativeTokenUsage): CostEstimate {
-  // 提示 token = input + cache（cache 按输入价格计费）
-  const promptTokens = tokens.inputTokens + tokens.cacheWriteTokens + tokens.cacheReadTokens;
-  const inputCost = (promptTokens / 1_000_000) * INPUT_PRICE_PER_M;
-  const outputCost = (tokens.outputTokens / 1_000_000) * OUTPUT_PRICE_PER_M;
+  let totalInputCost = 0;
+  let totalOutputCost = 0;
+
+  for (const m of tokens.byModel) {
+    const pricing = findPricing(m.model);
+    const promptTokens = m.inputTokens + m.cacheWriteTokens + m.cacheReadTokens;
+    totalInputCost += (promptTokens / 1_000_000) * pricing.inputPerM;
+    totalOutputCost += (m.outputTokens / 1_000_000) * pricing.outputPerM;
+  }
 
   return {
-    totalCost: inputCost + outputCost,
-    inputCost,
-    outputCost,
+    totalCost: totalInputCost + totalOutputCost,
+    inputCost: totalInputCost,
+    outputCost: totalOutputCost,
   };
 }
