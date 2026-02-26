@@ -1,6 +1,6 @@
 import type { HudConfig } from './config.js';
 import type { GitStatus } from './git.js';
-import type { CostData } from './pricing.js';
+import type { CumulativeTokenUsage, CostEstimate } from './pricing.js';
 
 export interface StdinData {
   transcript_path?: string;
@@ -73,6 +73,7 @@ export interface TranscriptData {
   agents: AgentEntry[];
   todos: TodoItem[];
   sessionStart?: Date;
+  cumulativeTokens: CumulativeTokenUsage;
 }
 
 export interface RenderContext {
@@ -87,5 +88,5 @@ export interface RenderContext {
   usageData: UsageData | null;
   config: HudConfig;
   extraLabel: string | null;
-  costData: CostData | null;
+  costData: (CumulativeTokenUsage & CostEstimate) | null;
 }
