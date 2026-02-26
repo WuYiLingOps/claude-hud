@@ -4,7 +4,7 @@ export function renderEnvironmentLine(ctx) {
     if (display?.showConfigCounts === false) {
         return null;
     }
-    const totalCounts = ctx.claudeMdCount + ctx.rulesCount + ctx.mcpCount + ctx.hooksCount;
+    const totalCounts = ctx.claudeMdCount + ctx.rulesCount + ctx.mcpCount + ctx.hooksCount + ctx.skillsCount;
     const threshold = display?.environmentThreshold ?? 0;
     if (totalCounts === 0 || totalCounts < threshold) {
         return null;
@@ -21,6 +21,9 @@ export function renderEnvironmentLine(ctx) {
     }
     if (ctx.hooksCount > 0) {
         parts.push(`${ctx.hooksCount} hooks`);
+    }
+    if (ctx.skillsCount > 0) {
+        parts.push(`${ctx.skillsCount} skills`);
     }
     if (parts.length === 0) {
         return null;

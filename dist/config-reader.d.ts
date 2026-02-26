@@ -3,6 +3,7 @@ export interface ConfigCounts {
     rulesCount: number;
     mcpCount: number;
     hooksCount: number;
+    skillsCount: number;
 }
 export declare function countConfigs(cwd?: string): Promise<ConfigCounts>;
 //# sourceMappingURL=config-reader.d.ts.map

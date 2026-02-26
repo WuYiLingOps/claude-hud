@@ -32,7 +32,7 @@ export async function main(overrides = {}) {
         }
         const transcriptPath = stdin.transcript_path ?? '';
         const transcript = await deps.parseTranscript(transcriptPath);
-        const { claudeMdCount, rulesCount, mcpCount, hooksCount } = await deps.countConfigs(stdin.cwd);
+        const { claudeMdCount, rulesCount, mcpCount, hooksCount, skillsCount } = await deps.countConfigs(stdin.cwd);
         const config = await deps.loadConfig();
         const gitStatus = config.gitStatus.enabled
             ? await deps.getGitStatus(stdin.cwd)
@@ -55,6 +55,7 @@ export async function main(overrides = {}) {
             rulesCount,
             mcpCount,
             hooksCount,
+            skillsCount,
             sessionDuration,
             gitStatus,
             usageData,
