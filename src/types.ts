@@ -83,6 +83,7 @@ export interface RenderContext {
   rulesCount: number;
   mcpCount: number;
   hooksCount: number;
+  skillsCount: number;
   sessionDuration: string;
   gitStatus: GitStatus | null;
   usageData: UsageData | null;
