@@ -15,6 +15,10 @@
 ```
 /plugin marketplace add jarrodwatts/claude-hud
 ```
+或通过 Git URL 添加：
+```
+/plugin marketplace add https://github.com/jarrodwatts/claude-hud.git
+```
 
 **第二步：安装插件**
 
@@ -59,6 +63,7 @@ Claude HUD 让你更好地了解 Claude Code 会话中正在发生的事情。
 | **工具活动** | 实时观察 Claude 正在读取、编辑、搜索哪些文件 |
 | **Agent 追踪** | 查看哪些子 Agent 正在运行及其任务内容 |
 | **Todo 进度** | 实时跟踪任务完成情况 |
+| **费用估算** | 基于 token 用量和模型定价显示当前会话的估算费用 |
 
 ## 显示效果
 
@@ -68,7 +73,7 @@ Claude HUD 让你更好地了解 Claude Code 会话中正在发生的事情。
 Context █████░░░░░ 45% │ Usage ██░░░░░░░░ 25% (1h 30m / 5h)
 ```
 - **第 1 行** — 模型名称、订阅计划（或 `Bedrock`）、项目路径、Git 分支
-- **第 2 行** — 上下文进度条（绿→黄→红）和用量速率限制
+- **第 2 行** — 上下文进度条（绿→黄→红）、用量速率限制和可选的费用估算
 
 ### 可选行（通过 `/claude-hud:configure` 启用）
 ```
@@ -76,6 +81,16 @@ Context █████░░░░░ 45% │ Usage ██░░░░░░░
 ◐ explore [haiku]: Finding auth code (2m 15s)    ← Agent 状态
 ▸ Fix authentication bug (2/5)                   ← Todo 进度
 ```
+
+### 费用估算（通过 `display.showCost` 启用）
+```
+Context █████░░░░░ 45% │ Usage ██░░░░░░░░ 25% │ Cost ~$0.12
+```
+带明细（`display.costBreakdown: true`）：
+```
+Context █████░░░░░ 45% │ Usage ██░░░░░░░░ 25% │ Cost ~$1.43 (in: $0.68, out: $0.42, cache: $0.33)
+```
+> **注意：** 费用基于当前上下文窗口的 token 快照和内置模型定价估算，不等同于 `/cost` 的累计总额。
 
 ---
 
@@ -146,6 +161,8 @@ Claude Code → stdin JSON → claude-hud → stdout → 终端显示
 | `display.showTools` | boolean | false | 显示工具活动行 |
 | `display.showAgents` | boolean | false | 显示 Agent 活动行 |
 | `display.showTodos` | boolean | false | 显示 Todo 进度行 |
+| `display.showCost` | boolean | false | 在第 2 行显示会话费用估算 |
+| `display.costBreakdown` | boolean | false | 显示费用明细（输入、输出、缓存） |
 
 ### 用量限制（Pro/Max/Team）
 
@@ -186,7 +203,8 @@ Context █████░░░░░ 45% │ Usage ██░░░░░░░
     "showAgents": true,
     "showTodos": true,
     "showConfigCounts": true,
-    "showDuration": true
+    "showDuration": true,
+    "showCost": true
   }
 }
 ```
