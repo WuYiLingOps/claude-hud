@@ -17,7 +17,7 @@ Inside a Claude Code instance, run the following commands:
 ```
 Or via Git URL:
 ```
-/plugin marketplace add https://github.com/jarrodwatts/claude-hud.git
+/plugin marketplace add https://github.com/WuYiLingOps/claude-hud.git
 ```
 
 **Step 2: Install the plugin**

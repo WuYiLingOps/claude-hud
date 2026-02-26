@@ -16,8 +16,11 @@
 /plugin marketplace add jarrodwatts/claude-hud
 ```
 或通过 Git URL 添加：
+
+> 该仓库为个人魔改
+
 ```
-/plugin marketplace add https://github.com/jarrodwatts/claude-hud.git
+/plugin marketplace add https://github.com/WuYiLingOps/claude-hud.git
 ```
 
 **第二步：安装插件**
