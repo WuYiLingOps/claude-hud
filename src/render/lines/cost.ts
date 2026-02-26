@@ -6,7 +6,7 @@
  * 系统用户：Administrator
  * 作　　者：無以菱
  * 联系邮箱：huangjing510@126.com
- * 功能描述：费用行渲染器，将 CostData 格式化为带颜色的费用显示字符串
+ * 功能描述：费用行渲染器，显示会话累计费用估算（基于统一定价）
  */
 
 import type { RenderContext } from '../../types.js';
@@ -29,30 +29,44 @@ function formatCost(cost: number): string {
  * @return ANSI 颜色转义序列
  */
 function getCostColor(cost: number): string {
-  if (cost > 2.00) return '\x1b[31m'; // red
-  if (cost >= 0.50) return '\x1b[33m'; // yellow
+  if (cost > 5.00) return '\x1b[31m'; // red
+  if (cost >= 1.00) return '\x1b[33m'; // yellow
+  if (cost >= 0.10) return '\x1b[32m'; // green
   return '\x1b[2m'; // dim
+}
+
+/**
+ * formatTokens 将 token 数量格式化为紧凑字符串
+ * @param n token 数量
+ * @return 格式化后的字符串，如 1.2k、45.0k、1.5M
+ */
+function formatTokens(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return n.toString();
 }
 
 /**
  * renderCostLine 渲染费用显示片段
  * @param ctx 渲染上下文
- * @return 格式化的费用字符串，未匹配定价时返回 null
+ * @return 格式化的费用字符串，无数据时返回 null
  */
 export function renderCostLine(ctx: RenderContext): string | null {
-  const costData = ctx.costData;
-  if (!costData || !costData.modelMatched) return null;
+  const data = ctx.costData;
+  if (!data) return null;
 
-  const color = getCostColor(costData.totalCost);
-  const costStr = formatCost(costData.totalCost);
-  let result = `Cost ${color}~${costStr}${RESET}`;
+  const total = data.inputTokens + data.outputTokens + data.cacheWriteTokens + data.cacheReadTokens;
+  if (total === 0) return null;
 
-  // 可选明细
+  const color = getCostColor(data.totalCost);
+  const costStr = formatCost(data.totalCost);
+  let result = `${dim('Cost')} ${color}~${costStr}${RESET}`;
+
+  // 可选明细：token 分类
   if (ctx.config?.display?.costBreakdown) {
-    const inStr = formatCost(costData.inputCost);
-    const outStr = formatCost(costData.outputCost);
-    const cacheStr = formatCost(costData.cacheWriteCost + costData.cacheReadCost);
-    result += dim(` (in: ${inStr}, out: ${outStr}, cache: ${cacheStr})`);
+    const inStr = formatTokens(data.inputTokens + data.cacheWriteTokens + data.cacheReadTokens);
+    const outStr = formatTokens(data.outputTokens);
+    result += dim(` (in: ${inStr}, out: ${outStr})`);
   }
 
   return result;
