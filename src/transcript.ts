@@ -1,11 +1,22 @@
 import * as fs from 'fs';
 import * as readline from 'readline';
 import type { TranscriptData, ToolEntry, AgentEntry, TodoItem } from './types.js';
+import type { CumulativeTokenUsage } from './pricing.js';
+
+interface TranscriptUsage {
+  input_tokens?: number;
+  output_tokens?: number;
+  cache_creation_input_tokens?: number;
+  cache_read_input_tokens?: number;
+}
 
 interface TranscriptLine {
+  type?: string;
   timestamp?: string;
   message?: {
+    role?: string;
     content?: ContentBlock[];
+    usage?: TranscriptUsage;
   };
 }
 
@@ -23,6 +34,12 @@ export async function parseTranscript(transcriptPath: string): Promise<Transcrip
     tools: [],
     agents: [],
     todos: [],
+    cumulativeTokens: {
+      inputTokens: 0,
+      outputTokens: 0,
+      cacheWriteTokens: 0,
+      cacheReadTokens: 0,
+    },
   };
 
   if (!transcriptPath || !fs.existsSync(transcriptPath)) {
@@ -74,6 +91,15 @@ function processEntry(
 
   if (!result.sessionStart && entry.timestamp) {
     result.sessionStart = timestamp;
+  }
+
+  // 累加 assistant 消息的 token 用量（仅取有 output 的最终消息，跳过流式中间快照）
+  if (entry.type === 'assistant' && entry.message?.usage && (entry.message.usage.output_tokens ?? 0) > 0) {
+    const u = entry.message.usage;
+    result.cumulativeTokens.inputTokens += u.input_tokens ?? 0;
+    result.cumulativeTokens.outputTokens += u.output_tokens ?? 0;
+    result.cumulativeTokens.cacheWriteTokens += u.cache_creation_input_tokens ?? 0;
+    result.cumulativeTokens.cacheReadTokens += u.cache_read_input_tokens ?? 0;
   }
 
   const content = entry.message?.content;
