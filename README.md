@@ -154,7 +154,7 @@ Claude Code → stdin JSON → claude-hud → stdout → 终端显示
 | `display.showModel` | boolean | true | 显示模型名称 `[Opus]` |
 | `display.showContextBar` | boolean | true | 显示上下文可视化进度条 `████░░░░░░` |
 | `display.contextValue` | `percent` \| `tokens` | `percent` | 上下文显示格式（`45%` 或 `45k/200k`） |
-| `display.showConfigCounts` | boolean | false | 显示 CLAUDE.md、规则、MCP、Hooks 数量 |
+| `display.showConfigCounts` | boolean | false | 显示 CLAUDE.md、规则、MCP、Hooks、Skills 数量 |
 | `display.showDuration` | boolean | false | 显示会话时长 `⏱️ 5m` |
 | `display.showSpeed` | boolean | false | 显示输出 token 速度 `out: 42.1 tok/s` |
 | `display.showUsage` | boolean | true | 显示用量限制（仅 Pro/Max/Team） |
