@@ -5,6 +5,7 @@ import { countConfigs } from './config-reader.js';
 import { getGitStatus } from './git.js';
 import { getUsage } from './usage-api.js';
 import { loadConfig } from './config.js';
+import { calculateCost } from './pricing.js';
 import { parseExtraCmdArg, runExtraCmd } from './extra-cmd.js';
 import type { RenderContext } from './types.js';
 import { fileURLToPath } from 'node:url';
@@ -66,6 +67,11 @@ export async function main(overrides: Partial<MainDeps> = {}): Promise<void> {
     const extraCmd = deps.parseExtraCmdArg();
     const extraLabel = extraCmd ? await deps.runExtraCmd(extraCmd) : null;
 
+    // 费用估算（仅在 showCost 启用时计算）
+    const costData = config.display.showCost
+      ? calculateCost(stdin.model?.id, stdin.context_window?.current_usage)
+      : null;
+
     const sessionDuration = formatSessionDuration(transcript.sessionStart, deps.now);
 
     const ctx: RenderContext = {
@@ -80,6 +86,7 @@ export async function main(overrides: Partial<MainDeps> = {}): Promise<void> {
       usageData,
       config,
       extraLabel,
+      costData,
     };
 
     deps.render(ctx);
