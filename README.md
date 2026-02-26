@@ -63,7 +63,7 @@ Claude HUD 让你更好地了解 Claude Code 会话中正在发生的事情。
 | **工具活动** | 实时观察 Claude 正在读取、编辑、搜索哪些文件 |
 | **Agent 追踪** | 查看哪些子 Agent 正在运行及其任务内容 |
 | **Todo 进度** | 实时跟踪任务完成情况 |
-| **费用估算** | 基于 token 用量和模型定价显示当前会话的估算费用 |
+| **费用估算** | 基于 transcript 累计 token 用量和统一定价显示当前会话的估算费用 |
 
 ## 显示效果
 
@@ -88,9 +88,9 @@ Context █████░░░░░ 45% │ Usage ██░░░░░░░
 ```
 带明细（`display.costBreakdown: true`）：
 ```
-Context █████░░░░░ 45% │ Usage ██░░░░░░░░ 25% │ Cost ~$1.43 (in: $0.68, out: $0.42, cache: $0.33)
+Context █████░░░░░ 45% │ Usage ██░░░░░░░░ 25% │ Cost ~$1.43 (in: 8.5M, out: 18.0k)
 ```
-> **注意：** 费用基于当前上下文窗口的 token 快照和内置模型定价估算，不等同于 `/cost` 的累计总额。
+> **注意：** 费用从 transcript 累加每次 API 调用的 token 用量，按统一定价（提示 $5/M，补全 $25/M）估算，仅供参考。
 
 ---
 
@@ -161,8 +161,8 @@ Claude Code → stdin JSON → claude-hud → stdout → 终端显示
 | `display.showTools` | boolean | false | 显示工具活动行 |
 | `display.showAgents` | boolean | false | 显示 Agent 活动行 |
 | `display.showTodos` | boolean | false | 显示 Todo 进度行 |
-| `display.showCost` | boolean | false | 在第 2 行显示会话费用估算 |
-| `display.costBreakdown` | boolean | false | 显示费用明细（输入、输出、缓存） |
+| `display.showCost` | boolean | false | 显示会话累计费用估算（基于 transcript 累加 token） |
+| `display.costBreakdown` | boolean | false | 显示费用明细（输入/输出 token 数量） |
 
 ### 用量限制（Pro/Max/Team）
 
