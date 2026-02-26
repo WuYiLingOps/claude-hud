@@ -67,9 +67,9 @@ export async function main(overrides: Partial<MainDeps> = {}): Promise<void> {
     const extraCmd = deps.parseExtraCmdArg();
     const extraLabel = extraCmd ? await deps.runExtraCmd(extraCmd) : null;
 
-    // 费用估算（仅在 showCost 启用时计算）
+    // 累计 token 用量 + 费用估算（从 transcript 累加，仅在 showCost 启用时计算）
     const costData = config.display.showCost
-      ? calculateCost(stdin.model?.id, stdin.context_window?.current_usage)
+      ? { ...transcript.cumulativeTokens, ...calculateCost(transcript.cumulativeTokens) }
       : null;
 
     const sessionDuration = formatSessionDuration(transcript.sessionStart, deps.now);
