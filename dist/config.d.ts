@@ -28,6 +28,8 @@ export interface HudConfig {
         usageThreshold: number;
         sevenDayThreshold: number;
         environmentThreshold: number;
+        showCost: boolean;
+        costBreakdown: boolean;
     };
 }
 export declare const DEFAULT_CONFIG: HudConfig;

@@ -28,6 +28,8 @@ export const DEFAULT_CONFIG = {
         usageThreshold: 0,
         sevenDayThreshold: 80,
         environmentThreshold: 0,
+        showCost: false,
+        costBreakdown: false,
     },
 };
 export function getConfigPath() {
@@ -134,6 +136,12 @@ function mergeConfig(userConfig) {
         usageThreshold: validateThreshold(migrated.display?.usageThreshold, 100),
         sevenDayThreshold: validateThreshold(migrated.display?.sevenDayThreshold, 100),
         environmentThreshold: validateThreshold(migrated.display?.environmentThreshold, 100),
+        showCost: typeof migrated.display?.showCost === 'boolean'
+            ? migrated.display.showCost
+            : DEFAULT_CONFIG.display.showCost,
+        costBreakdown: typeof migrated.display?.costBreakdown === 'boolean'
+            ? migrated.display.costBreakdown
+            : DEFAULT_CONFIG.display.costBreakdown,
     };
     return { lineLayout, showSeparators, pathLevels, gitStatus, display };
 }

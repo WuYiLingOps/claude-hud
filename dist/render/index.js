@@ -2,7 +2,7 @@ import { renderSessionLine } from './session-line.js';
 import { renderToolsLine } from './tools-line.js';
 import { renderAgentsLine } from './agents-line.js';
 import { renderTodosLine } from './todos-line.js';
-import { renderIdentityLine, renderProjectLine, renderEnvironmentLine, renderUsageLine, } from './lines/index.js';
+import { renderIdentityLine, renderProjectLine, renderEnvironmentLine, renderUsageLine, renderCostLine, } from './lines/index.js';
 import { dim, RESET } from './colors.js';
 function stripAnsi(str) {
     // eslint-disable-next-line no-control-regex
@@ -53,11 +53,17 @@ function renderExpanded(ctx) {
     }
     const identityLine = renderIdentityLine(ctx);
     const usageLine = renderUsageLine(ctx);
-    if (identityLine && usageLine) {
-        lines.push(`${identityLine} \u2502 ${usageLine}`);
-    }
-    else if (identityLine) {
-        lines.push(identityLine);
+    const costLine = renderCostLine(ctx);
+    // 第 2 行：identity + usage + cost，用 │ 分隔
+    const line2Parts = [];
+    if (identityLine)
+        line2Parts.push(identityLine);
+    if (usageLine)
+        line2Parts.push(usageLine);
+    if (costLine)
+        line2Parts.push(costLine);
+    if (line2Parts.length > 0) {
+        lines.push(line2Parts.join(' \u2502 '));
     }
     const environmentLine = renderEnvironmentLine(ctx);
     if (environmentLine) {

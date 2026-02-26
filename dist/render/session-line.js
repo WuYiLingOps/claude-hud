@@ -2,6 +2,7 @@ import { isLimitReached } from '../types.js';
 import { getContextPercent, getBufferedPercent, getModelName, getProviderLabel, getTotalTokens } from '../stdin.js';
 import { getOutputSpeed } from '../speed-tracker.js';
 import { coloredBar, cyan, dim, magenta, red, yellow, getContextColor, quotaBar, RESET } from './colors.js';
+import { renderCostLine } from './lines/cost.js';
 const DEBUG = process.env.DEBUG?.includes('claude-hud') || process.env.DEBUG === '*';
 /**
  * Renders the full session line (model + context bar + project + git + counts + usage + duration).
@@ -151,6 +152,13 @@ export function renderSessionLine(ctx) {
                     parts.push(fiveHourPart);
                 }
             }
+        }
+    }
+    // Cost estimation (compact mode)
+    if (display?.showCost) {
+        const costLine = renderCostLine(ctx);
+        if (costLine) {
+            parts.push(costLine);
         }
     }
     // Session duration

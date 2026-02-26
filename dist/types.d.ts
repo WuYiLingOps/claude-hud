@@ -1,5 +1,6 @@
 import type { HudConfig } from './config.js';
 import type { GitStatus } from './git.js';
+import type { CostData } from './pricing.js';
 export interface StdinData {
     transcript_path?: string;
     cwd?: string;
@@ -74,5 +75,6 @@ export interface RenderContext {
     usageData: UsageData | null;
     config: HudConfig;
     extraLabel: string | null;
+    costData: CostData | null;
 }
 //# sourceMappingURL=types.d.ts.map

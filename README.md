@@ -1,37 +1,37 @@
 # Claude HUD
 
-A Claude Code plugin that shows what's happening — context usage, active tools, running agents, and todo progress. Always visible below your input.
+一个 Claude Code 插件，实时显示会话状态 — 上下文用量、工具活动、Agent 状态和 Todo 进度。始终显示在输入区下方。
 
 [![License](https://img.shields.io/github/license/jarrodwatts/claude-hud?v=2)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/jarrodwatts/claude-hud)](https://github.com/jarrodwatts/claude-hud/stargazers)
 
-![Claude HUD in action](claude-hud-preview-5-2.png)
+![Claude HUD 效果预览](claude-hud-preview-5-2.png)
 
-## Install
+## 安装
 
-Inside a Claude Code instance, run the following commands:
+在 Claude Code 中依次执行以下命令：
 
-**Step 1: Add the marketplace**
+**第一步：添加插件市场**
 ```
 /plugin marketplace add jarrodwatts/claude-hud
 ```
 
-**Step 2: Install the plugin**
+**第二步：安装插件**
 
 <details>
-<summary><strong>⚠️ Linux users: Click here first</strong></summary>
+<summary><strong>⚠️ Linux 用户请先点击此处</strong></summary>
 
-On Linux, `/tmp` is often a separate filesystem (tmpfs), which causes plugin installation to fail with:
+在 Linux 上，`/tmp` 通常是独立的文件系统（tmpfs），会导致插件安装失败并报错：
 ```
 EXDEV: cross-device link not permitted
 ```
 
-**Fix**: Set TMPDIR before installing:
+**解决方法**：安装前设置 TMPDIR：
 ```bash
 mkdir -p ~/.cache/tmp && TMPDIR=~/.cache/tmp claude
 ```
 
-Then run the install command below in that session. This is a [Claude Code platform limitation](https://github.com/anthropics/claude-code/issues/14799).
+然后在该会话中执行下方的安装命令。这是 [Claude Code 平台的已知限制](https://github.com/anthropics/claude-code/issues/14799)。
 
 </details>
 
@@ -39,137 +39,137 @@ Then run the install command below in that session. This is a [Claude Code platf
 /plugin install claude-hud
 ```
 
-**Step 3: Configure the statusline**
+**第三步：配置状态栏**
 ```
 /claude-hud:setup
 ```
 
-Done! The HUD appears immediately — no restart needed.
+完成！HUD 立即生效，无需重启。
 
 ---
 
-## What is Claude HUD?
+## 什么是 Claude HUD？
 
-Claude HUD gives you better insights into what's happening in your Claude Code session.
+Claude HUD 让你更好地了解 Claude Code 会话中正在发生的事情。
 
-| What You See | Why It Matters |
-|--------------|----------------|
-| **Project path** | Know which project you're in (configurable 1-3 directory levels) |
-| **Context health** | Know exactly how full your context window is before it's too late |
-| **Tool activity** | Watch Claude read, edit, and search files as it happens |
-| **Agent tracking** | See which subagents are running and what they're doing |
-| **Todo progress** | Track task completion in real-time |
+| 显示内容 | 作用 |
+|----------|------|
+| **项目路径** | 知道当前在哪个项目中（可配置 1-3 级目录深度） |
+| **上下文健康度** | 精确掌握上下文窗口的使用情况，避免溢出 |
+| **工具活动** | 实时观察 Claude 正在读取、编辑、搜索哪些文件 |
+| **Agent 追踪** | 查看哪些子 Agent 正在运行及其任务内容 |
+| **Todo 进度** | 实时跟踪任务完成情况 |
 
-## What You See
+## 显示效果
 
-### Default (2 lines)
+### 默认模式（2 行）
 ```
 [Opus | Max] │ my-project git:(main*)
 Context █████░░░░░ 45% │ Usage ██░░░░░░░░ 25% (1h 30m / 5h)
 ```
-- **Line 1** — Model, plan name (or `Bedrock`), project path, git branch
-- **Line 2** — Context bar (green → yellow → red) and usage rate limits
+- **第 1 行** — 模型名称、订阅计划（或 `Bedrock`）、项目路径、Git 分支
+- **第 2 行** — 上下文进度条（绿→黄→红）和用量速率限制
 
-### Optional lines (enable via `/claude-hud:configure`)
+### 可选行（通过 `/claude-hud:configure` 启用）
 ```
-◐ Edit: auth.ts | ✓ Read ×3 | ✓ Grep ×2        ← Tools activity
-◐ explore [haiku]: Finding auth code (2m 15s)    ← Agent status
-▸ Fix authentication bug (2/5)                   ← Todo progress
+◐ Edit: auth.ts | ✓ Read ×3 | ✓ Grep ×2        ← 工具活动
+◐ explore [haiku]: Finding auth code (2m 15s)    ← Agent 状态
+▸ Fix authentication bug (2/5)                   ← Todo 进度
 ```
 
 ---
 
-## How It Works
+## 工作原理
 
-Claude HUD uses Claude Code's native **statusline API** — no separate window, no tmux required, works in any terminal.
+Claude HUD 使用 Claude Code 原生的 **statusline API** — 无需额外窗口，无需 tmux，适用于任何终端。
 
 ```
-Claude Code → stdin JSON → claude-hud → stdout → displayed in your terminal
-           ↘ transcript JSONL (tools, agents, todos)
+Claude Code → stdin JSON → claude-hud → stdout → 终端显示
+           ↘ transcript JSONL（工具、Agent、Todo）
 ```
 
-**Key features:**
-- Native token data from Claude Code (not estimated)
-- Parses the transcript for tool/agent activity
-- Updates every ~300ms
+**核心特性：**
+- 直接从 Claude Code 获取原生 token 数据（非估算值）
+- 解析 transcript 文件获取工具/Agent 活动
+- 约每 300ms 刷新一次
 
 ---
 
-## Configuration
+## 配置
 
-Customize your HUD anytime:
+随时自定义你的 HUD：
 
 ```
 /claude-hud:configure
 ```
 
-The guided flow walks you through customization — no manual editing needed:
+交互式引导流程，无需手动编辑配置文件：
 
-- **First time setup**: Choose a preset (Full/Essential/Minimal), then fine-tune individual elements
-- **Customize anytime**: Toggle items on/off, adjust git display style, switch layouts
-- **Preview before saving**: See exactly how your HUD will look before committing changes
+- **首次设置**：选择预设方案（完整/精简/极简），然后微调各项元素
+- **随时调整**：开关各项显示、调整 Git 显示样式、切换布局
+- **保存前预览**：提交更改前查看 HUD 的实际效果
 
-### Presets
+### 预设方案
 
-| Preset | What's Shown |
-|--------|--------------|
-| **Full** | Everything enabled — tools, agents, todos, git, usage, duration |
-| **Essential** | Activity lines + git status, minimal info clutter |
-| **Minimal** | Core only — just model name and context bar |
+| 预设 | 显示内容 |
+|------|----------|
+| **完整（Full）** | 全部启用 — 工具、Agent、Todo、Git、用量、时长 |
+| **精简（Essential）** | 活动行 + Git 状态，信息精简 |
+| **极简（Minimal）** | 仅核心内容 — 模型名称和上下文进度条 |
 
-After choosing a preset, you can turn individual elements on or off.
+选择预设后，可以单独开关各项元素。
 
-### Manual Configuration
+### 手动配置
 
-You can also edit the config file directly at `~/.claude/plugins/claude-hud/config.json`.
+也可以直接编辑配置文件：`~/.claude/plugins/claude-hud/config.json`
 
-### Options
+### 配置选项
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `lineLayout` | string | `expanded` | Layout: `expanded` (multi-line) or `compact` (single line) |
-| `pathLevels` | 1-3 | 1 | Directory levels to show in project path |
-| `gitStatus.enabled` | boolean | true | Show git branch in HUD |
-| `gitStatus.showDirty` | boolean | true | Show `*` for uncommitted changes |
-| `gitStatus.showAheadBehind` | boolean | false | Show `↑N ↓N` for ahead/behind remote |
-| `gitStatus.showFileStats` | boolean | false | Show file change counts `!M +A ✘D ?U` |
-| `display.showModel` | boolean | true | Show model name `[Opus]` |
-| `display.showContextBar` | boolean | true | Show visual context bar `████░░░░░░` |
-| `display.contextValue` | `percent` \| `tokens` | `percent` | Context display format (`45%` or `45k/200k`) |
-| `display.showConfigCounts` | boolean | false | Show CLAUDE.md, rules, MCPs, hooks counts |
-| `display.showDuration` | boolean | false | Show session duration `⏱️ 5m` |
-| `display.showSpeed` | boolean | false | Show output token speed `out: 42.1 tok/s` |
-| `display.showUsage` | boolean | true | Show usage limits (Pro/Max/Team only) |
-| `display.usageBarEnabled` | boolean | true | Display usage as visual bar instead of text |
-| `display.sevenDayThreshold` | 0-100 | 80 | Show 7-day usage when >= threshold (0 = always) |
-| `display.showTokenBreakdown` | boolean | true | Show token details at high context (85%+) |
-| `display.showTools` | boolean | false | Show tools activity line |
-| `display.showAgents` | boolean | false | Show agents activity line |
-| `display.showTodos` | boolean | false | Show todos progress line |
+| 选项 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `lineLayout` | string | `expanded` | 布局模式：`expanded`（多行）或 `compact`（单行） |
+| `pathLevels` | 1-3 | 1 | 项目路径显示的目录层级数 |
+| `gitStatus.enabled` | boolean | true | 在 HUD 中显示 Git 分支 |
+| `gitStatus.showDirty` | boolean | true | 有未提交更改时显示 `*` |
+| `gitStatus.showAheadBehind` | boolean | false | 显示领先/落后远程的提交数 `↑N ↓N` |
+| `gitStatus.showFileStats` | boolean | false | 显示文件变更统计 `!M +A ✘D ?U` |
+| `display.showModel` | boolean | true | 显示模型名称 `[Opus]` |
+| `display.showContextBar` | boolean | true | 显示上下文可视化进度条 `████░░░░░░` |
+| `display.contextValue` | `percent` \| `tokens` | `percent` | 上下文显示格式（`45%` 或 `45k/200k`） |
+| `display.showConfigCounts` | boolean | false | 显示 CLAUDE.md、规则、MCP、Hooks 数量 |
+| `display.showDuration` | boolean | false | 显示会话时长 `⏱️ 5m` |
+| `display.showSpeed` | boolean | false | 显示输出 token 速度 `out: 42.1 tok/s` |
+| `display.showUsage` | boolean | true | 显示用量限制（仅 Pro/Max/Team） |
+| `display.usageBarEnabled` | boolean | true | 以可视化进度条显示用量（而非纯文本） |
+| `display.sevenDayThreshold` | 0-100 | 80 | 7 天用量达到此阈值时显示（0 = 始终显示） |
+| `display.showTokenBreakdown` | boolean | true | 高上下文（85%+）时显示 token 明细 |
+| `display.showTools` | boolean | false | 显示工具活动行 |
+| `display.showAgents` | boolean | false | 显示 Agent 活动行 |
+| `display.showTodos` | boolean | false | 显示 Todo 进度行 |
 
-### Usage Limits (Pro/Max/Team)
+### 用量限制（Pro/Max/Team）
 
-Usage display is **enabled by default** for Claude Pro, Max, and Team subscribers. It shows your rate limit consumption on line 2 alongside the context bar.
+用量显示对 Claude Pro、Max 和 Team 订阅用户**默认启用**。在第 2 行与上下文进度条并排显示速率限制消耗情况。
 
-The 7-day percentage appears when above the `display.sevenDayThreshold` (default 80%):
+当 7 天用量超过 `display.sevenDayThreshold`（默认 80%）时会额外显示：
 
 ```
 Context █████░░░░░ 45% │ Usage ██░░░░░░░░ 25% (1h 30m / 5h) | ██████████ 85% (2d / 7d)
 ```
 
-To disable, set `display.showUsage` to `false`.
+如需关闭，将 `display.showUsage` 设为 `false`。
 
-**Requirements:**
-- Claude Pro, Max, or Team subscription (not available for API users)
-- OAuth credentials from Claude Code (created automatically when you log in)
+**前提条件：**
+- Claude Pro、Max 或 Team 订阅（API 用户不可用）
+- Claude Code 的 OAuth 凭证（登录时自动创建）
 
-**Troubleshooting:** If usage doesn't appear:
-- Ensure you're logged in with a Pro/Max/Team account (not API key)
-- Check `display.showUsage` is not set to `false` in config
-- API users see no usage display (they have pay-per-token, not rate limits)
-- AWS Bedrock models display `Bedrock` and hide usage limits (usage is managed in AWS)
+**故障排查：** 如果用量未显示：
+- 确认使用 Pro/Max/Team 账户登录（非 API Key）
+- 检查配置中 `display.showUsage` 是否被设为 `false`
+- API 用户不会显示用量（按量计费，无速率限制）
+- AWS Bedrock 模型显示 `Bedrock` 并隐藏用量限制（用量由 AWS 管理）
 
-### Example Configuration
+### 配置示例
 
 ```json
 {
@@ -191,47 +191,47 @@ To disable, set `display.showUsage` to `false`.
 }
 ```
 
-### Display Examples
+### 显示示例
 
-**1 level (default):** `[Opus] │ my-project git:(main)`
+**1 级目录（默认）：** `[Opus] │ my-project git:(main)`
 
-**2 levels:** `[Opus] │ apps/my-project git:(main)`
+**2 级目录：** `[Opus] │ apps/my-project git:(main)`
 
-**3 levels:** `[Opus] │ dev/apps/my-project git:(main)`
+**3 级目录：** `[Opus] │ dev/apps/my-project git:(main)`
 
-**With dirty indicator:** `[Opus] │ my-project git:(main*)`
+**带脏标记：** `[Opus] │ my-project git:(main*)`
 
-**With ahead/behind:** `[Opus] │ my-project git:(main ↑2 ↓1)`
+**带领先/落后：** `[Opus] │ my-project git:(main ↑2 ↓1)`
 
-**With file stats:** `[Opus] │ my-project git:(main* !3 +1 ?2)`
-- `!` = modified files, `+` = added/staged, `✘` = deleted, `?` = untracked
-- Counts of 0 are omitted for cleaner display
+**带文件统计：** `[Opus] │ my-project git:(main* !3 +1 ?2)`
+- `!` = 已修改文件，`+` = 已暂存，`✘` = 已删除，`?` = 未跟踪
+- 数量为 0 的项会省略，保持显示简洁
 
-### Troubleshooting
+### 故障排查
 
-**Config not applying?**
-- Check for JSON syntax errors: invalid JSON silently falls back to defaults
-- Ensure valid values: `pathLevels` must be 1, 2, or 3; `lineLayout` must be `expanded` or `compact`
-- Delete config and run `/claude-hud:configure` to regenerate
+**配置未生效？**
+- 检查 JSON 语法错误：无效的 JSON 会静默回退到默认值
+- 确认值有效：`pathLevels` 必须为 1、2 或 3；`lineLayout` 必须为 `expanded` 或 `compact`
+- 删除配置文件并运行 `/claude-hud:configure` 重新生成
 
-**Git status missing?**
-- Verify you're in a git repository
-- Check `gitStatus.enabled` is not `false` in config
+**Git 状态未显示？**
+- 确认当前目录是 Git 仓库
+- 检查配置中 `gitStatus.enabled` 是否被设为 `false`
 
-**Tool/agent/todo lines missing?**
-- These are hidden by default — enable with `showTools`, `showAgents`, `showTodos` in config
-- They also only appear when there's activity to show
+**工具/Agent/Todo 行未显示？**
+- 这些行默认隐藏 — 在配置中启用 `showTools`、`showAgents`、`showTodos`
+- 仅在有活动时才会显示
 
 ---
 
-## Requirements
+## 系统要求
 
 - Claude Code v1.0.80+
-- Node.js 18+ or Bun
+- Node.js 18+ 或 Bun
 
 ---
 
-## Development
+## 开发
 
 ```bash
 git clone https://github.com/jarrodwatts/claude-hud
@@ -240,16 +240,16 @@ npm ci && npm run build
 npm test
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ---
 
-## License
+## 许可证
 
-MIT — see [LICENSE](LICENSE)
+MIT — 详见 [LICENSE](LICENSE)
 
 ---
 
-## Star History
+## Star 趋势
 
 [![Star History Chart](https://api.star-history.com/svg?repos=jarrodwatts/claude-hud&type=Date)](https://star-history.com/#jarrodwatts/claude-hud&Date)
