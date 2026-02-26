@@ -5,6 +5,12 @@ export async function parseTranscript(transcriptPath) {
         tools: [],
         agents: [],
         todos: [],
+        cumulativeTokens: {
+            inputTokens: 0,
+            outputTokens: 0,
+            cacheWriteTokens: 0,
+            cacheReadTokens: 0,
+        },
     };
     if (!transcriptPath || !fs.existsSync(transcriptPath)) {
         return result;
@@ -43,6 +49,14 @@ function processEntry(entry, toolMap, agentMap, taskIdToIndex, latestTodos, resu
     const timestamp = entry.timestamp ? new Date(entry.timestamp) : new Date();
     if (!result.sessionStart && entry.timestamp) {
         result.sessionStart = timestamp;
+    }
+    // 累加 assistant 消息的 token 用量（仅取有 output 的最终消息，跳过流式中间快照）
+    if (entry.type === 'assistant' && entry.message?.usage && (entry.message.usage.output_tokens ?? 0) > 0) {
+        const u = entry.message.usage;
+        result.cumulativeTokens.inputTokens += u.input_tokens ?? 0;
+        result.cumulativeTokens.outputTokens += u.output_tokens ?? 0;
+        result.cumulativeTokens.cacheWriteTokens += u.cache_creation_input_tokens ?? 0;
+        result.cumulativeTokens.cacheReadTokens += u.cache_read_input_tokens ?? 0;
     }
     const content = entry.message?.content;
     if (!content || !Array.isArray(content))
