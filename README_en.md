@@ -63,7 +63,7 @@ Claude HUD gives you better insights into what's happening in your Claude Code s
 | **Tool activity** | Watch Claude read, edit, and search files as it happens |
 | **Agent tracking** | See which subagents are running and what they're doing |
 | **Todo progress** | Track task completion in real-time |
-| **Cost estimation** | See estimated session cost based on token usage and model pricing |
+| **Cost estimation** | See estimated session cost based on cumulative token usage from transcript |
 
 ## What You See
 
@@ -88,9 +88,9 @@ Context █████░░░░░ 45% │ Usage ██░░░░░░░
 ```
 With breakdown (`display.costBreakdown: true`):
 ```
-Context █████░░░░░ 45% │ Usage ██░░░░░░░░ 25% │ Cost ~$1.43 (in: $0.68, out: $0.42, cache: $0.33)
+Context █████░░░░░ 45% │ Usage ██░░░░░░░░ 25% │ Cost ~$1.43 (in: 8.5M, out: 18.0k)
 ```
-> **Note:** Cost is estimated from the current context window token snapshot and built-in model pricing. It is not equivalent to `/cost` cumulative totals.
+> **Note:** Cost is accumulated from each API call's token usage in the transcript, estimated with unified pricing (prompt $5/M, completion $25/M). For reference only.
 
 ---
 
@@ -161,8 +161,8 @@ You can also edit the config file directly at `~/.claude/plugins/claude-hud/conf
 | `display.showTools` | boolean | false | Show tools activity line |
 | `display.showAgents` | boolean | false | Show agents activity line |
 | `display.showTodos` | boolean | false | Show todos progress line |
-| `display.showCost` | boolean | false | Show estimated session cost on line 2 |
-| `display.costBreakdown` | boolean | false | Show cost breakdown (input, output, cache) |
+| `display.showCost` | boolean | false | Show cumulative session cost estimate (from transcript token accumulation) |
+| `display.costBreakdown` | boolean | false | Show cost breakdown (input/output token counts) |
 
 ### Usage Limits (Pro/Max/Team)
 
