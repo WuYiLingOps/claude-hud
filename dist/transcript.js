@@ -10,6 +10,7 @@ export async function parseTranscript(transcriptPath) {
             outputTokens: 0,
             cacheWriteTokens: 0,
             cacheReadTokens: 0,
+            byModel: [],
         },
     };
     if (!transcriptPath || !fs.existsSync(transcriptPath)) {
@@ -53,10 +54,26 @@ function processEntry(entry, toolMap, agentMap, taskIdToIndex, latestTodos, resu
     // 累加 assistant 消息的 token 用量（仅取有 output 的最终消息，跳过流式中间快照）
     if (entry.type === 'assistant' && entry.message?.usage && (entry.message.usage.output_tokens ?? 0) > 0) {
         const u = entry.message.usage;
-        result.cumulativeTokens.inputTokens += u.input_tokens ?? 0;
-        result.cumulativeTokens.outputTokens += u.output_tokens ?? 0;
-        result.cumulativeTokens.cacheWriteTokens += u.cache_creation_input_tokens ?? 0;
-        result.cumulativeTokens.cacheReadTokens += u.cache_read_input_tokens ?? 0;
+        const inTok = u.input_tokens ?? 0;
+        const outTok = u.output_tokens ?? 0;
+        const cwTok = u.cache_creation_input_tokens ?? 0;
+        const crTok = u.cache_read_input_tokens ?? 0;
+        // 汇总累加
+        result.cumulativeTokens.inputTokens += inTok;
+        result.cumulativeTokens.outputTokens += outTok;
+        result.cumulativeTokens.cacheWriteTokens += cwTok;
+        result.cumulativeTokens.cacheReadTokens += crTok;
+        // 按模型分别累加
+        const modelId = entry.message.model ?? 'unknown';
+        let modelEntry = result.cumulativeTokens.byModel.find(m => m.model === modelId);
+        if (!modelEntry) {
+            modelEntry = { model: modelId, inputTokens: 0, outputTokens: 0, cacheWriteTokens: 0, cacheReadTokens: 0 };
+            result.cumulativeTokens.byModel.push(modelEntry);
+        }
+        modelEntry.inputTokens += inTok;
+        modelEntry.outputTokens += outTok;
+        modelEntry.cacheWriteTokens += cwTok;
+        modelEntry.cacheReadTokens += crTok;
     }
     const content = entry.message?.content;
     if (!content || !Array.isArray(content))
