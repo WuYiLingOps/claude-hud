@@ -10,6 +10,7 @@ export interface ConfigCounts {
   rulesCount: number;
   mcpCount: number;
   hooksCount: number;
+  skillsCount: number;
 }
 
 // Valid keys for disabled MCP arrays in config files
@@ -91,10 +92,43 @@ function countRulesInDir(rulesDir: string): number {
   return count;
 }
 
+function countSkillsInDir(skillsDir: string): number {
+  if (!fs.existsSync(skillsDir)) return 0;
+  let count = 0;
+  try {
+    const entries = fs.readdirSync(skillsDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        count++;
+      }
+    }
+  } catch (error) {
+    debug(`Failed to read skills from ${skillsDir}:`, error);
+  }
+  return count;
+}
+
+function countCommandsInDir(commandsDir: string): number {
+  if (!fs.existsSync(commandsDir)) return 0;
+  let count = 0;
+  try {
+    const entries = fs.readdirSync(commandsDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isFile() && entry.name.endsWith('.md')) {
+        count++;
+      }
+    }
+  } catch (error) {
+    debug(`Failed to read commands from ${commandsDir}:`, error);
+  }
+  return count;
+}
+
 export async function countConfigs(cwd?: string): Promise<ConfigCounts> {
   let claudeMdCount = 0;
   let rulesCount = 0;
   let hooksCount = 0;
+  let skillsCount = 0;
 
   const homeDir = os.homedir();
   const claudeDir = path.join(homeDir, '.claude');
@@ -125,6 +159,9 @@ export async function countConfigs(cwd?: string): Promise<ConfigCounts> {
   for (const name of getMcpServerNames(userClaudeJson)) {
     userMcpServers.add(name);
   }
+
+  // ~/.claude/skills/ (每个子目录为一个 skill)
+  skillsCount += countSkillsInDir(path.join(claudeDir, 'skills'));
 
   // Get disabled user-scope MCPs from ~/.claude.json
   const disabledUserMcps = getDisabledMcpServers(userClaudeJson, 'disabledMcpServers');
@@ -175,6 +212,9 @@ export async function countConfigs(cwd?: string): Promise<ConfigCounts> {
     }
     hooksCount += countHooksInFile(localSettings);
 
+    // 插件 commands/ 目录中的斜杠命令也算 skills
+    skillsCount += countCommandsInDir(path.join(cwd, 'commands'));
+
     // Get disabled .mcp.json servers from settings.local.json
     const disabledMcpJsonServers = getDisabledMcpServers(localSettings, 'disabledMcpjsonServers');
     for (const name of disabledMcpJsonServers) {
@@ -192,6 +232,6 @@ export async function countConfigs(cwd?: string): Promise<ConfigCounts> {
   // A server with the same name in both user and project scope counts as 2 (separate configs).
   const mcpCount = userMcpServers.size + projectMcpServers.size;
 
-  return { claudeMdCount, rulesCount, mcpCount, hooksCount };
+  return { claudeMdCount, rulesCount, mcpCount, hooksCount, skillsCount };
 }
 
