@@ -44,6 +44,7 @@ interface ModelPricing {
 const MODEL_PRICING: Record<string, ModelPricing> = {
   opus: { inputPerM: 5, outputPerM: 25 },
   sonnet: { inputPerM: 3, outputPerM: 15 },
+  haiku: { inputPerM: 1, outputPerM: 5 },
 };
 
 // 默认定价（未匹配时使用 opus 定价）
